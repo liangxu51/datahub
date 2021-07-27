@@ -37,9 +37,10 @@ framework_common = {
     "entrypoints",
     "docker",
     "expandvars>=0.6.5",
-    "avro-gen3==0.5.0",
+    "avro-gen3==0.5.3",
     "avro-python3>=1.8.2",
     "python-dateutil",
+    "stackprinter",
 }
 
 kafka_common = {
@@ -83,7 +84,7 @@ plugins: Dict[str, Set[str]] = {
     | {
         # Acryl Data maintains a fork of PyHive, which adds support for table comments
         # and column comments, and also releases HTTP and HTTPS transport schemes.
-        "acryl-pyhive[hive]>=0.6.9"
+        "acryl-pyhive[hive]>=0.6.10"
     },
     "ldap": {"python-ldap>=2.4"},
     "looker": {"looker-sdk==21.6.0"},
@@ -96,8 +97,8 @@ plugins: Dict[str, Set[str]] = {
     "postgres": sql_common | {"psycopg2-binary", "GeoAlchemy2"},
     "redshift": sql_common | {"sqlalchemy-redshift", "psycopg2-binary", "GeoAlchemy2"},
     "sagemaker": aws_common,
-    "snowflake": sql_common | {"snowflake-sqlalchemy"},
-    "snowflake-usage": sql_common | {"snowflake-sqlalchemy"},
+    "snowflake": sql_common | {"snowflake-sqlalchemy<=1.2.4"},
+    "snowflake-usage": sql_common | {"snowflake-sqlalchemy<=1.2.4"},
     "superset": {"requests"},
 }
 
@@ -147,15 +148,10 @@ base_dev_requirements = {
         for plugin in [
             "bigquery",
             "bigquery-usage",
-            "mysql",
-            "mssql",
-            "mongodb",
-            "feast",
-            "ldap",
             "looker",
             "glue",
-            "hive",
             "oracle",
+            "postgres",
             "sagemaker",
             "datahub-kafka",
             "datahub-rest",
@@ -173,43 +169,58 @@ if is_py37_or_newer:
 
 dev_requirements = {
     *base_dev_requirements,
-    "apache-airflow==1.10.15",
-    "apache-airflow-backport-providers-snowflake",  # Used in the example DAGs.
+    "apache-airflow[snowflake]>=2.0.2",  # snowflake is used in example dags
 }
-dev_requirements_airflow_2 = {
+dev_requirements_airflow_1 = {
     *base_dev_requirements,
-    "apache-airflow>=2.0.2",
-    "apache-airflow-providers-snowflake",
+    "apache-airflow==1.10.15",
+    "apache-airflow-backport-providers-snowflake",
 }
 
+full_test_dev_requirements = {
+    *list(
+        dependency
+        for plugin in [
+            "druid",
+            "feast",
+            "hive",
+            "ldap",
+            "mongodb",
+            "mssql",
+            "mysql",
+            "snowflake",
+        ]
+        for dependency in plugins[plugin]
+    ),
+}
 
 entry_points = {
     "console_scripts": ["datahub = datahub.entrypoints:main"],
     "datahub.ingestion.source.plugins": [
         "file = datahub.ingestion.source.file:GenericFileSource",
-        "sqlalchemy = datahub.ingestion.source.sql_generic:SQLAlchemyGenericSource",
-        "athena = datahub.ingestion.source.athena:AthenaSource",
-        "bigquery = datahub.ingestion.source.bigquery:BigQuerySource",
-        "bigquery-usage = datahub.ingestion.source.bigquery_usage:BigQueryUsageSource",
+        "sqlalchemy = datahub.ingestion.source.sql.sql_generic:SQLAlchemyGenericSource",
+        "athena = datahub.ingestion.source.sql.athena:AthenaSource",
+        "bigquery = datahub.ingestion.source.sql.bigquery:BigQuerySource",
+        "bigquery-usage = datahub.ingestion.source.usage.bigquery_usage:BigQueryUsageSource",
         "dbt = datahub.ingestion.source.dbt:DBTSource",
-        "druid = datahub.ingestion.source.druid:DruidSource",
+        "druid = datahub.ingestion.source.sql.druid:DruidSource",
         "feast = datahub.ingestion.source.feast:FeastSource",
-        "glue = datahub.ingestion.source.glue:GlueSource",
-        "sagemaker = datahub.ingestion.source.sagemaker:SagemakerSource",
-        "hive = datahub.ingestion.source.hive:HiveSource",
+        "glue = datahub.ingestion.source.aws.glue:GlueSource",
+        "sagemaker = datahub.ingestion.source.aws.sagemaker:SagemakerSource",
+        "hive = datahub.ingestion.source.sql.hive:HiveSource",
         "kafka = datahub.ingestion.source.kafka:KafkaSource",
         "kafka-connect = datahub.ingestion.source.kafka_connect:KafkaConnectSource",
         "ldap = datahub.ingestion.source.ldap:LDAPSource",
         "looker = datahub.ingestion.source.looker:LookerDashboardSource",
         "lookml = datahub.ingestion.source.lookml:LookMLSource",
         "mongodb = datahub.ingestion.source.mongodb:MongoDBSource",
-        "mssql = datahub.ingestion.source.mssql:SQLServerSource",
-        "mysql = datahub.ingestion.source.mysql:MySQLSource",
-        "oracle = datahub.ingestion.source.oracle:OracleSource",
-        "postgres = datahub.ingestion.source.postgres:PostgresSource",
-        "redshift = datahub.ingestion.source.redshift:RedshiftSource",
-        "snowflake = datahub.ingestion.source.snowflake:SnowflakeSource",
-        "snowflake-usage = datahub.ingestion.source.snowflake_usage:SnowflakeUsageSource",
+        "mssql = datahub.ingestion.source.sql.mssql:SQLServerSource",
+        "mysql = datahub.ingestion.source.sql.mysql:MySQLSource",
+        "oracle = datahub.ingestion.source.sql.oracle:OracleSource",
+        "postgres = datahub.ingestion.source.sql.postgres:PostgresSource",
+        "redshift = datahub.ingestion.source.sql.redshift:RedshiftSource",
+        "snowflake = datahub.ingestion.source.sql.snowflake:SnowflakeSource",
+        "snowflake-usage = datahub.ingestion.source.usage.snowflake_usage:SnowflakeUsageSource",
         "superset = datahub.ingestion.source.superset:SupersetSource",
     ],
     "datahub.ingestion.sink.plugins": [
@@ -232,7 +243,6 @@ setuptools.setup(
         "Source": "https://github.com/linkedin/datahub",
         "Changelog": "https://github.com/linkedin/datahub/releases",
     },
-    author="DataHub Committers",
     license="Apache License 2.0",
     description="A CLI to work with DataHub metadata",
     long_description=get_long_description(),
@@ -266,6 +276,7 @@ setuptools.setup(
         "datahub": ["py.typed"],
         "datahub.metadata": ["schema.avsc"],
         "datahub.metadata.schemas": ["*.avsc"],
+        "datahub.ingestion.source.feast_image": ["Dockerfile", "requirements.txt"],
     },
     entry_points=entry_points,
     # Dependencies.
@@ -286,6 +297,7 @@ setuptools.setup(
             )
         ),
         "dev": list(dev_requirements),
-        "dev-airflow2": list(dev_requirements_airflow_2),
+        "dev-airflow1": list(dev_requirements_airflow_1),
+        "integration-tests": list(full_test_dev_requirements),
     },
 )

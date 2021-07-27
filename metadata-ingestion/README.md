@@ -92,7 +92,8 @@ We have prebuilt images available on [Docker hub](https://hub.docker.com/r/linke
 _Limitation: the datahub_docker.sh convenience script assumes that the recipe and any input/output files are accessible in the current working directory or its subdirectories. Files outside the current working directory will not be found, and you'll need to invoke the Docker image directly._
 
 ```shell
-./scripts/datahub_docker.sh ingest -c ./examples/recipes/example_to_datahub_rest.yml
+# Assumes the DataHub repo is cloned locally.
+./metadata-ingestion/scripts/datahub_docker.sh ingest -c ./examples/recipes/example_to_datahub_rest.yml
 ```
 
 ### Install from source
@@ -152,12 +153,14 @@ source:
   config:
     connection:
       bootstrap: "broker:9092"
-      consumer_config: {} # passed to https://docs.confluent.io/platform/current/clients/confluent-kafka-python/html/index.html#serde-consumer
+      consumer_config: {} # passed to https://docs.confluent.io/platform/current/clients/confluent-kafka-python/html/index.html#confluent_kafka.DeserializingConsumer
       schema_registry_url: http://localhost:8081
       schema_registry_config: {} # passed to https://docs.confluent.io/platform/current/clients/confluent-kafka-python/html/index.html#confluent_kafka.schema_registry.SchemaRegistryClient
 ```
 
-For a full example with a number of security options, see this [example recipe](./examples/recipes/secured_kafka_to_console.yml).
+The options in the consumer config and schema registry config are passed to the Kafka DeserializingConsumer and SchemaRegistryClient respectively.
+
+For a full example with a number of security options, see this [example recipe](./examples/recipes/secured_kafka.yml).
 
 ### MySQL Metadata `mysql`
 
@@ -311,6 +314,7 @@ Extracts:
 - List of databases, schema, and tables
 - Column types associated with each table
 - Also supports PostGIS extensions
+- database_alias (optional) can be used to change the name of database to be ingested
 
 ```yml
 source:
@@ -320,6 +324,7 @@ source:
     password: pass
     host_port: localhost:5432
     database: DemoDatabase
+    database_alias: DatabaseNameToBeIngested
     include_views: True # whether to include views, defaults to True
     # table_pattern/schema_pattern is same as above
     # options is same as above
@@ -346,11 +351,32 @@ source:
     # options is same as above
 ```
 
+<details>
+  <summary>Extra options when running Redshift behind a proxy</summary>
+
+This requires you to have already installed the Microsoft ODBC Driver for SQL Server.
+See https://docs.microsoft.com/en-us/sql/connect/python/pyodbc/step-1-configure-development-environment-for-pyodbc-python-development?view=sql-server-ver15
+
+```yml
+source:
+  type: redshift
+  config:
+    # username, password, database, etc are all the same as above
+    host_port: my-proxy-hostname:5439
+    options:
+      connect_args:
+        sslmode: "prefer" # or "require" or "verify-ca"
+        sslrootcert: ~ # needed to unpin the AWS Redshift certificate
+```
+
+</details>
+
 ### AWS SageMaker `sagemaker`
 
 Extracts:
 
-- Feature groups (support for models, jobs, and more coming soon!)
+- Feature groups
+- Models, jobs, and lineage between the two (e.g. when jobs output a model or a model is used by a job)
 
 ```yml
 source:
@@ -365,6 +391,18 @@ source:
     aws_secret_access_key: # Optional.
     aws_session_token: # Optional.
     aws_role: # Optional (Role chaining supported by using a sorted list).
+
+    extract_feature_groups: True # if feature groups should be ingested, default True
+    extract_models: True # if models should be ingested, default True
+    extract_jobs: # if jobs should be ingested, default True for all
+      auto_ml: True
+      compilation: True
+      edge_packaging: True
+      hyper_parameter_tuning: True
+      labeling: True
+      processing: True
+      training: True
+      transform: True
 ```
 
 ### Snowflake `snowflake`
@@ -381,7 +419,14 @@ source:
     username: user
     password: pass
     host_port: account_name
-    database: db_name
+    database_pattern:
+      # The escaping of the $ symbol helps us skip the environment variable substitution.
+      allow:
+        - ^MY_DEMO_DATA.*
+        - ^ANOTHER_DB_REGEX
+      deny:
+        - ^SNOWFLAKE\$
+        - ^SNOWFLAKE_SAMPLE_DATA\$
     warehouse: "COMPUTE_WH" # optional
     role: "sysadmin" # optional
     include_views: True # whether to include views, defaults to True
@@ -478,7 +523,7 @@ source:
     options: # options is same as above
       # See https://github.com/mxmzdlv/pybigquery#authentication for details.
       credentials_path: "/path/to/keyfile.json" # optional
-      include_views: True # whether to include views, defaults to True
+    include_views: True # whether to include views, defaults to True
     # table_pattern/schema_pattern is same as above
 ```
 
@@ -509,7 +554,6 @@ source:
     # See https://docs.aws.amazon.com/athena/latest/ug/querying.html
     # However, the athena driver will transparently fetch these results as you would expect from any other sql client.
     work_group: athena_workgroup # "primary"
-    include_views: True # whether to include views, defaults to True
     # table_pattern/schema_pattern is same as above
 ```
 
@@ -662,17 +706,16 @@ source:
     base_folder: /path/to/model/files # where the *.model.lkml and *.view.lkml files are stored
     connection_to_platform_map: # mappings between connection names in the model files to platform names
       connection_name: platform_name (or platform_name.database_name) # for ex. my_snowflake_conn: snowflake.my_database
-    platform_name: "looker" # optional, default is "looker"
-    actor: "urn:li:corpuser:etl" # optional, default is "urn:li:corpuser:etl"
     model_pattern: {}
     view_pattern: {}
     env: "PROD" # optional, default is "PROD"
     parse_table_names_from_sql: False # see note below
+    platform_name: "looker" # optional, default is "looker"
 ```
 
 Note! The integration can use [`sql-metadata`](https://pypi.org/project/sql-metadata/) to try to parse the tables the
 views depends on. As these SQL's can be complicated, and the package doesn't official support all the SQL dialects that
-Looker support, the result might not be correct. This parsing is disables by default, but can be enabled by setting
+Looker supports, the result might not be correct. This parsing is disabled by default, but can be enabled by setting
 `parse_table_names_from_sql: True`.
 
 ### Looker dashboards `looker`
@@ -682,19 +725,20 @@ Extracts:
 - Looker dashboards and dashboard elements (charts)
 - Names, descriptions, URLs, chart types, input view for the charts
 
+See the [Looker authentication docs](https://docs.looker.com/reference/api-and-integration/api-auth#authentication_with_an_sdk) for the steps to create a client ID and secret.
+
 ```yml
 source:
   type: "looker"
   config:
-    client_id: str # Your Looker API client ID. As your Looker admin
-    client_secret: str # Your Looker API client secret. As your Looker admin
-    base_url: str # The url to your Looker instance: https://company.looker.com:19999 or https://looker.company.com, or similar.
-    platform_name: str = "looker" # Optional, default is "looker"
-    view_platform_name: str = "looker_views" # Optional, default is "looker_views". Should be the same `platform_name` in the `lookml` source, if that source is also run.
-    actor: str = "urn:li:corpuser:etl" # Optional, "urn:li:corpuser:etl"
-    dashboard_pattern: AllowDenyPattern = AllowDenyPattern.allow_all()
-    chart_pattern: AllowDenyPattern = AllowDenyPattern.allow_all()
-    env: str = "PROD" # Optional, default is "PROD"
+    client_id: # Your Looker API3 client ID
+    client_secret: # Your Looker API3 client secret
+    base_url: # The url to your Looker instance: https://company.looker.com:19999 or https://looker.company.com, or similar.
+    dashboard_pattern: # supports allow/deny regexes
+    chart_pattern: # supports allow/deny regexes
+    actor: urn:li:corpuser:etl # Optional, defaults to urn:li:corpuser:etl
+    env: "PROD" # Optional, default is "PROD"
+    platform_name: "looker" # Optional, default is "looker"
 ```
 
 ### File `file`
@@ -755,7 +799,7 @@ Note: when `load_schemas` is False, models that use [identifiers](https://docs.g
 - Fetch a list of tables and columns accessed
 - Aggregate these statistics into buckets, by day or hour granularity
 
-Note: the client must have one of the following OAuth scopes:
+Note: the client must have one of the following OAuth scopes, and should be authorized on all projects you'd like to ingest usage stats from.
 
 - https://www.googleapis.com/auth/logging.read
 - https://www.googleapis.com/auth/logging.admin
@@ -766,7 +810,9 @@ Note: the client must have one of the following OAuth scopes:
 source:
   type: bigquery-usage
   config:
-    project_id: project # optional - can autodetect from environment
+    projects: # optional - can autodetect a single project from the environment
+      - project_id_1
+      - project_id_2
     options:
       # See https://googleapis.dev/python/logging/latest/client.html for details.
       credentials: ~ # optional - see docs
@@ -869,10 +915,14 @@ sink:
   config:
     connection:
       bootstrap: "localhost:9092"
-      producer_config: {} # passed to https://docs.confluent.io/platform/current/clients/confluent-kafka-python/index.html#serializingproducer
+      producer_config: {} # passed to https://docs.confluent.io/platform/current/clients/confluent-kafka-python/html/index.html#confluent_kafka.SerializingProducer
       schema_registry_url: "http://localhost:8081"
       schema_registry_config: {} # passed to https://docs.confluent.io/platform/current/clients/confluent-kafka-python/html/index.html#confluent_kafka.schema_registry.SchemaRegistryClient
 ```
+
+The options in the producer config and schema registry config are passed to the Kafka SerializingProducer and SchemaRegistryClient respectively.
+
+For a full example with a number of security options, see this [example recipe](./examples/recipes/secured_kafka.yml).
 
 ### Console `console`
 
@@ -962,7 +1012,7 @@ In some cases, you might want to construct the MetadataChangeEvents yourself but
 
 There's a couple ways to get lineage information from Airflow into DataHub.
 
-:::note Running ingestion on a schedule
+:::note
 
 If you're simply looking to run ingestion on a schedule, take a look at these sample DAGs:
 
@@ -988,7 +1038,7 @@ The Airflow lineage backend is only supported in Airflow 1.10.15+ and 2.0.2+.
    airflow connections add  --conn-type 'datahub_kafka' 'datahub_kafka_default' --conn-host 'broker:9092' --conn-extra '{}'
    ```
 
-2. Add the following lines to your `airflow.cfg` file. You might need to
+2. Add the following lines to your `airflow.cfg` file.
    ```ini
    [lineage]
    backend = datahub_provider.lineage.datahub.DatahubLineageBackend
@@ -999,12 +1049,12 @@ The Airflow lineage backend is only supported in Airflow 1.10.15+ and 2.0.2+.
        "graceful_exceptions": true }
    # The above indentation is important!
    ```
-   Configuration options:
+   **Configuration options:**
    - `datahub_conn_id` (required): Usually `datahub_rest_default` or `datahub_kafka_default`, depending on what you named the connection in step 1.
    - `capture_ownership_info` (defaults to true): If true, the owners field of the DAG will be capture as a DataHub corpuser.
    - `capture_tags_info` (defaults to true): If true, the tags field of the DAG will be captured as DataHub tags.
    - `graceful_exceptions` (defaults to true): If set to true, most runtime errors in the lineage backend will be suppressed and will not cause the overall task to fail. Note that configuration issues will still throw exceptions.
-3. Configure `inlets` and `outlets` for your Airflow operators. For reference, look at the sample DAG in [`lineage_backend_demo.py`](./src/datahub_provider/example_dags/lineage_backend_demo.py).
+3. Configure `inlets` and `outlets` for your Airflow operators. For reference, look at the sample DAG in [`lineage_backend_demo.py`](./src/datahub_provider/example_dags/lineage_backend_demo.py), or reference [`lineage_backend_taskflow_demo.py`](./src/datahub_provider/example_dags/lineage_backend_taskflow_demo.py) if you're using the [TaskFlow API](https://airflow.apache.org/docs/apache-airflow/stable/concepts/taskflow.html).
 4. [optional] Learn more about [Airflow lineage](https://airflow.apache.org/docs/apache-airflow/stable/lineage.html), including shorthand notation and some automation.
 
 ### Emitting lineage via a separate operator
