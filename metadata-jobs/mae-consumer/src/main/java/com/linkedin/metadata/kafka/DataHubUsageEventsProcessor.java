@@ -37,8 +37,8 @@ public class DataHubUsageEventsProcessor {
     this.indexName = indexConvention.getIndexName("datahub_usage_event");
   }
 
-  @KafkaListener(id = "${KAFKA_CONSUMER_GROUP_ID:datahub-usage-event-consumer-job-client}", topics =
-      "${DATAHUB_USAGE_EVENT_NAME:" + Topics.DATAHUB_USAGE_EVENT + "}", containerFactory = "stringSerializedKafkaListener")
+  @KafkaListener(id = "${DATAHUB_USAGE_EVENT_KAFKA_CONSUMER_GROUP_ID:datahub-usage-event-consumer-job-client}", topics =
+      "${DATAHUB_USAGE_EVENT_NAME:" + Topics.DATAHUB_USAGE_EVENT + "}", containerFactory = "simpleKafkaConsumer")
   public void consume(final ConsumerRecord<String, String> consumerRecord) {
     final String record = consumerRecord.value();
     log.debug("Got DHUE");

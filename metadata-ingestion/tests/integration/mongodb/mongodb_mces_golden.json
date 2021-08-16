@@ -44,7 +44,12 @@
             ]
         }
     },
-    "proposedDelta": null
+    "proposedDelta": null,
+    "systemMetadata": {
+        "lastObserved": 1615443388097,
+        "runId": "mongodb-test",
+        "properties": null
+    }
 },
 {
     "auditHeader": null,
@@ -97,7 +102,8 @@
                                 "nativeDataType": "oid",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "age",
@@ -112,7 +118,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "canSwim",
@@ -127,7 +134,8 @@
                                 "nativeDataType": "boolean",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "emptyObject",
@@ -142,7 +150,8 @@
                                 "nativeDataType": "OBJECT",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteColor",
@@ -157,7 +166,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood",
@@ -172,7 +182,8 @@
                                 "nativeDataType": "OBJECT",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.calories",
@@ -187,7 +198,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.emptyObject",
@@ -202,7 +214,8 @@
                                 "nativeDataType": "OBJECT",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.ingredients",
@@ -219,7 +232,8 @@
                                 "nativeDataType": "ARRAY",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.ingredients.color",
@@ -234,7 +248,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.ingredients.from",
@@ -249,7 +264,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.ingredients.name",
@@ -264,7 +280,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.name",
@@ -279,7 +296,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "favoriteFood.servings",
@@ -294,7 +312,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "legs",
@@ -309,7 +328,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "mixedType",
@@ -326,7 +346,8 @@
                                 "nativeDataType": "mixed",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "name",
@@ -341,7 +362,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "seen",
@@ -356,7 +378,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "servings",
@@ -371,7 +394,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "sometimesNull",
@@ -386,7 +410,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "tags",
@@ -403,7 +428,8 @@
                                 "nativeDataType": "ARRAY",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "type",
@@ -418,7 +444,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             }
                         ],
                         "primaryKeys": null,
@@ -428,7 +455,12 @@
             ]
         }
     },
-    "proposedDelta": null
+    "proposedDelta": null,
+    "systemMetadata": {
+        "lastObserved": 1615443388097,
+        "runId": "mongodb-test",
+        "properties": null
+    }
 },
 {
     "auditHeader": null,
@@ -481,7 +513,8 @@
                                 "nativeDataType": "oid",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "mixedType",
@@ -498,7 +531,8 @@
                                 "nativeDataType": "mixed",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "mixedType.fieldA",
@@ -513,7 +547,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "mixedType.fieldTwo",
@@ -528,7 +563,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "name",
@@ -543,7 +579,8 @@
                                 "nativeDataType": "string",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "nullableMixedType",
@@ -560,7 +597,8 @@
                                 "nativeDataType": "mixed",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "rating",
@@ -575,7 +613,8 @@
                                 "nativeDataType": "float",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "tasty",
@@ -590,7 +629,8 @@
                                 "nativeDataType": "boolean",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             },
                             {
                                 "fieldPath": "varieties",
@@ -607,7 +647,8 @@
                                 "nativeDataType": "ARRAY",
                                 "recursive": false,
                                 "globalTags": null,
-                                "glossaryTerms": null
+                                "glossaryTerms": null,
+                                "isPartOfKey": false
                             }
                         ],
                         "primaryKeys": null,
@@ -617,6 +658,11 @@
             ]
         }
     },
-    "proposedDelta": null
+    "proposedDelta": null,
+    "systemMetadata": {
+        "lastObserved": 1615443388097,
+        "runId": "mongodb-test",
+        "properties": null
+    }
 }
 ]

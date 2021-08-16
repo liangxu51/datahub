@@ -26,6 +26,8 @@ import { GlossaryTermEntity } from './app/entity/glossaryTerm/GlossaryTermEntity
 import { MLFeatureEntity } from './app/entity/mlFeature/MLFeatureEntity';
 import { MLPrimaryKeyEntity } from './app/entity/mlPrimaryKey/MLPrimaryKeyEntity';
 import { MLFeatureTableEntity } from './app/entity/mlFeatureTable/MLFeatureTableEntity';
+import { MLModelEntity } from './app/entity/mlModel/MLModelEntity';
+import { MLModelGroupEntity } from './app/entity/mlModelGroup/MLModelGroupEntity';
 
 /*
     Construct Apollo Client
@@ -44,39 +46,13 @@ const errorLink = onError(({ networkError }) => {
 });
 
 const client = new ApolloClient({
+    connectToDevTools: true,
     link: errorLink.concat(httpLink),
-    cache: new InMemoryCache({
-        typePolicies: {
-            Dataset: {
-                keyFields: ['urn'],
-            },
-            CorpUser: {
-                keyFields: ['urn'],
-            },
-            Dashboard: {
-                keyFields: ['urn'],
-            },
-            Chart: {
-                keyFields: ['urn'],
-            },
-            DataFlow: {
-                keyFields: ['urn'],
-            },
-            DataJob: {
-                keyFields: ['urn'],
-            },
-            MLFeatureTable: {
-                keyFields: ['urn'],
-            },
-        },
-        possibleTypes: {
-            EntityWithRelationships: ['Dataset', 'Chart', 'Dashboard', 'DataJob', 'MLFeature', 'MLPrimaryKey'],
-        },
-    }),
+    cache: new InMemoryCache(),
     credentials: 'include',
     defaultOptions: {
         watchQuery: {
-            fetchPolicy: 'cache-and-network',
+            fetchPolicy: 'no-cache',
             nextFetchPolicy: 'cache-first',
         },
         query: {
@@ -108,6 +84,8 @@ const App: React.VFC = () => {
         register.register(new MLFeatureEntity());
         register.register(new MLPrimaryKeyEntity());
         register.register(new MLFeatureTableEntity());
+        register.register(new MLModelEntity());
+        register.register(new MLModelGroupEntity());
         return register;
     }, []);
 

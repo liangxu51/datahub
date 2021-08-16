@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 from dataclasses import replace
 from enum import Enum
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import pydantic
 
@@ -130,6 +130,7 @@ class LookerModel:
                 or inc.endswith(".dashboard.lookml")
                 or inc.endswith(".dashboard.lkml")
             ):
+                logger.debug(f"include '{inc}' is a dashboard, skipping it")
                 continue
 
             # Massage the looker include into a valid glob wildcard expression
@@ -139,8 +140,9 @@ class LookerModel:
                 # Need to handle a relative path.
                 glob_expr = str(pathlib.Path(path).parent / inc)
             # "**" matches an arbitrary number of directories in LookML
-            outputs = glob.glob(glob_expr, recursive=True) + glob.glob(
-                f"{glob_expr}.lkml", recursive=True
+            outputs = sorted(
+                glob.glob(glob_expr, recursive=True)
+                + glob.glob(f"{glob_expr}.lkml", recursive=True)
             )
             if "*" not in inc and not outputs:
                 reporter.report_failure(path, f"cannot resolve include {inc}")
@@ -209,6 +211,7 @@ class LookerViewFileLoader:
                 looker_viewfile = LookerViewFile.from_looker_dict(
                     path, parsed, self._base_folder, reporter
                 )
+                logger.debug(f"adding viewfile for path {path} to the cache")
                 self.viewfile_cache[path] = looker_viewfile
                 return looker_viewfile
         except Exception as e:
@@ -305,7 +308,9 @@ class LookerView:
 
         # Some sql_table_name fields contain quotes like: optimizely."group", just remove the quotes
         sql_table_name = (
-            sql_table_name.replace('"', "") if sql_table_name is not None else None
+            sql_table_name.replace('"', "").replace("`", "")
+            if sql_table_name is not None
+            else None
         )
         derived_table = looker_view.get("derived_table", None)
 
@@ -429,12 +434,39 @@ field_type_mapping = {
     **POSTGRES_TYPES_MAP,
     **SNOWFLAKE_TYPES_MAP,
     "date": DateTypeClass,
+    "date_day_of_month": NumberTypeClass,
+    "date_day_of_week": EnumTypeClass,
+    "date_day_of_week_index": EnumTypeClass,
+    "date_fiscal_month_num": NumberTypeClass,
+    "date_fiscal_quarter": DateTypeClass,
+    "date_fiscal_quarter_of_year": EnumTypeClass,
+    "date_hour": TimeTypeClass,
+    "date_hour_of_day": NumberTypeClass,
+    "date_month": DateTypeClass,
+    "date_month_num": NumberTypeClass,
+    "date_month_name": EnumTypeClass,
+    "date_quarter": DateTypeClass,
+    "date_quarter_of_year": EnumTypeClass,
     "date_time": TimeTypeClass,
+    "date_time_of_day": TimeTypeClass,
+    "date_microsecond": TimeTypeClass,
     "date_millisecond": TimeTypeClass,
     "date_minute": TimeTypeClass,
     "date_raw": TimeTypeClass,
+    "date_second": TimeTypeClass,
     "date_week": TimeTypeClass,
-    "duration_day": TimeTypeClass,
+    "date_year": DateTypeClass,
+    "date_day_of_year": NumberTypeClass,
+    "date_week_of_year": NumberTypeClass,
+    "date_fiscal_year": DateTypeClass,
+    "duration_day": StringTypeClass,
+    "duration_hour": StringTypeClass,
+    "duration_minute": StringTypeClass,
+    "duration_month": StringTypeClass,
+    "duration_quarter": StringTypeClass,
+    "duration_second": StringTypeClass,
+    "duration_week": StringTypeClass,
+    "duration_year": StringTypeClass,
     "distance": NumberTypeClass,
     "duration": NumberTypeClass,
     "location": UnionTypeClass,
@@ -517,6 +549,9 @@ class LookMLSource(Source):
     def _get_upstream_lineage(self, looker_view: LookerView) -> UpstreamLineage:
         upstreams = []
         for sql_table_name in looker_view.sql_table_names:
+
+            sql_table_name = sql_table_name.replace('"', "").replace("`", "")
+
             upstream = UpstreamClass(
                 dataset=self._construct_datalineage_urn(
                     sql_table_name, looker_view.connection
@@ -587,7 +622,7 @@ class LookMLSource(Source):
         dataset_name = looker_view.view_name
 
         # Sanitize the urn creation.
-        dataset_name = dataset_name.replace("`", "")
+        dataset_name = dataset_name.replace('"', "").replace("`", "")
         dataset_snapshot = DatasetSnapshot(
             urn=builder.make_dataset_urn(
                 self.source_config.platform_name, dataset_name, self.source_config.env
@@ -606,6 +641,10 @@ class LookMLSource(Source):
         viewfile_loader = LookerViewFileLoader(
             str(self.source_config.base_folder), self.reporter
         )
+
+        # some views can be mentioned by multiple 'include' statements, so this set is used to prevent
+        # creating duplicate MCE messages
+        views_with_workunits: Set[str] = set()
 
         # The ** means "this directory and all subdirectories", and hence should
         # include all the files we want.
@@ -628,8 +667,8 @@ class LookMLSource(Source):
                 continue
 
             for include in model.resolved_includes:
-                is_view_seen = viewfile_loader.is_view_seen(include)
-                if is_view_seen:
+                if include in views_with_workunits:
+                    logger.debug(f"view '{include}' already processed, skipping it")
                     continue
 
                 logger.debug(f"Attempting to load view file: {include}")
@@ -663,6 +702,7 @@ class LookMLSource(Source):
                                     id=f"lookml-{maybe_looker_view.view_name}", mce=mce
                                 )
                                 self.reporter.report_workunit(workunit)
+                                views_with_workunits.add(include)
                                 yield workunit
                             else:
                                 self.reporter.report_views_dropped(
