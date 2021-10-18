@@ -30,9 +30,9 @@ export class GlossaryTermEntity implements Entity<GlossaryTerm> {
         );
     };
 
-    isSearchEnabled = () => false;
+    isSearchEnabled = () => true;
 
-    isBrowseEnabled = () => false;
+    isBrowseEnabled = () => true;
 
     getAutoCompleteFieldName = () => 'name';
 
@@ -40,7 +40,9 @@ export class GlossaryTermEntity implements Entity<GlossaryTerm> {
 
     getPathName = () => 'glossary';
 
-    getCollectionName = () => 'Business Glossary';
+    getCollectionName = () => 'Glossary Terms';
+
+    getEntityName = () => 'Glossary Term';
 
     renderProfile: (urn: string) => JSX.Element = (_) => <GlossaryTermProfile />;
 
@@ -57,5 +59,9 @@ export class GlossaryTermEntity implements Entity<GlossaryTerm> {
                 owners={data?.ownership?.owners}
             />
         );
+    };
+
+    displayName = (data: GlossaryTerm) => {
+        return data.name;
     };
 }

@@ -1,0 +1,28 @@
+query appConfig {
+    appConfig {
+        policiesConfig {
+            enabled
+            platformPrivileges {
+                type
+                displayName
+                description
+            }
+            resourcePrivileges {
+                resourceType
+                resourceTypeDisplayName
+                entityType
+                privileges {
+                    type
+                    displayName
+                    description
+                }
+            }
+        }
+        analyticsConfig {
+            enabled
+        }
+        identityManagementConfig {
+            enabled
+        }
+    }
+}

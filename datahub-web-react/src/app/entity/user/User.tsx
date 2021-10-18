@@ -17,7 +17,7 @@ export class UserEntity implements Entity<CorpUser> {
         }
 
         if (styleType === IconStyleType.HIGHLIGHT) {
-            return <UserOutlined style={{ fontSize, color: 'rgb(144 163 236)' }} />;
+            return <UserOutlined style={{ fontSize }} />;
         }
 
         return (
@@ -40,6 +40,8 @@ export class UserEntity implements Entity<CorpUser> {
 
     getPathName: () => string = () => 'user';
 
+    getEntityName = () => 'User';
+
     getCollectionName: () => string = () => 'Users';
 
     renderProfile: (urn: string) => JSX.Element = (_) => <UserProfile />;
@@ -47,7 +49,7 @@ export class UserEntity implements Entity<CorpUser> {
     renderPreview = (_: PreviewType, data: CorpUser) => (
         <Preview
             urn={data.urn}
-            name={data.info?.displayName || data.urn}
+            name={data.info?.displayName || data.username}
             title={data.info?.title || ''}
             photoUrl={data.editableInfo?.pictureLink || undefined}
         />
@@ -55,5 +57,9 @@ export class UserEntity implements Entity<CorpUser> {
 
     renderSearch = (result: SearchResult) => {
         return this.renderPreview(PreviewType.SEARCH, result.entity as CorpUser);
+    };
+
+    displayName = (data: CorpUser) => {
+        return data.info?.displayName || data.info?.fullName || data.username;
     };
 }

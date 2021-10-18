@@ -7,6 +7,7 @@ import com.linkedin.datahub.graphql.generated.CorpUser;
 import com.linkedin.datahub.graphql.generated.Dashboard;
 import com.linkedin.datahub.graphql.generated.DataFlow;
 import com.linkedin.datahub.graphql.generated.DataJob;
+import com.linkedin.datahub.graphql.generated.DataPlatform;
 import com.linkedin.datahub.graphql.generated.Dataset;
 import com.linkedin.datahub.graphql.generated.GlossaryTerm;
 import com.linkedin.datahub.graphql.generated.Entity;
@@ -63,7 +64,7 @@ public class UrnToEntityMapper implements ModelMapper<com.linkedin.common.urn.Ur
       ((CorpUser) partialEntity).setUrn(input.toString());
     }
     if (input.getEntityType().equals("corpGroup")) {
-      partialEntity = new CorpUser();
+      partialEntity = new CorpGroup();
       ((CorpGroup) partialEntity).setUrn(input.toString());
     }
     if (input.getEntityType().equals("mlFeature")) {
@@ -85,6 +86,10 @@ public class UrnToEntityMapper implements ModelMapper<com.linkedin.common.urn.Ur
     if (input.getEntityType().equals("mlModelGroup")) {
       partialEntity = new MLModelGroup();
       ((MLModelGroup) partialEntity).setUrn(input.toString());
+    }
+    if (input.getEntityType().equals("dataPlatform")) {
+      partialEntity = new DataPlatform();
+      ((DataPlatform) partialEntity).setUrn(input.toString());
     }
     return partialEntity;
   }

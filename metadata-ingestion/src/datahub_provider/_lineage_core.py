@@ -24,6 +24,9 @@ class DatahubBasicLineageConfig(ConfigModel):
     # DataHub hook connection ID.
     datahub_conn_id: str
 
+    # Cluster to associate with the pipelines and tasks. Defaults to "prod".
+    cluster: str = builder.DEFAULT_FLOW_CLUSTER
+
     # If true, the owners field of the DAG will be capture as a DataHub corpuser.
     capture_ownership_info: bool = True
 
@@ -58,7 +61,7 @@ def send_lineage_to_datahub(
     # task_instance: "TaskInstance" = context["task_instance"]
     # TODO: capture raw sql from db operators
 
-    flow_urn = builder.make_data_flow_urn("airflow", dag.dag_id)
+    flow_urn = builder.make_data_flow_urn("airflow", dag.dag_id, config.cluster)
     job_urn = builder.make_data_job_urn_with_flow(flow_urn, task.task_id)
 
     base_url = conf.get("webserver", "base_url")
@@ -85,6 +88,41 @@ def send_lineage_to_datahub(
             job_property_bag[key] = repr(getattr(task, key))
     # operator.log.info(f"{flow_property_bag=}")
     # operator.log.info(f"{job_property_bag=}")
+    allowed_task_keys = [
+        "_downstream_task_ids",
+        "_inlets",
+        "_outlets",
+        "_task_type",
+        "_task_module",
+        "depends_on_past",
+        "email",
+        "label",
+        "execution_timeout",
+        "end_date",
+        "start_date",
+        "sla",
+        "sql",
+        "task_id",
+        "trigger_rule",
+        "wait_for_downstream",
+    ]
+    job_property_bag = {
+        k: v for (k, v) in job_property_bag.items() if k in allowed_task_keys
+    }
+    allowed_flow_keys = [
+        "_access_control",
+        "_concurrency",
+        "_default_view",
+        "catchup",
+        "fileloc",
+        "is_paused_upon_creation",
+        "start_date",
+        "tags",
+        "timezone",
+    ]
+    flow_property_bag = {
+        k: v for (k, v) in flow_property_bag.items() if k in allowed_flow_keys
+    }
 
     if config.capture_ownership_info:
         timestamp = int(dateutil.parser.parse(context["ts"]).timestamp() * 1000)

@@ -57,6 +57,7 @@ module.exports = {
       "docs/quickstart",
       "docs/debugging",
       "metadata-ingestion/README",
+      "docs/policies",
     ],
     Architecture: [
       "docs/architecture/architecture",
@@ -95,6 +96,71 @@ module.exports = {
       // "docs/what/delta",
       // "docs/what/mxe",
     ],
+    "GraphQL API": [
+      {
+        label: "Overview",
+        type: "doc",
+        id: "docs/api/graphql/overview",
+      },
+      {
+        Reference: [
+          {
+            type: "doc",
+            label: "Queries",
+            id: "graphql/queries",
+          },
+          {
+            type: "doc",
+            label: "Mutations",
+            id: "graphql/mutations",
+          },
+          {
+            type: "doc",
+            label: "Objects",
+            id: "graphql/objects",
+          },
+          {
+            type: "doc",
+            label: "Inputs",
+            id: "graphql/inputObjects",
+          },
+          {
+            type: "doc",
+            label: "Interfaces",
+            id: "graphql/interfaces",
+          },
+          {
+            type: "doc",
+            label: "Unions",
+            id: "graphql/unions",
+          },
+          {
+            type: "doc",
+            label: "Enums",
+            id: "graphql/enums",
+          },
+          {
+            type: "doc",
+            label: "Scalars",
+            id: "graphql/scalars",
+          },
+        ],
+      },
+      {
+        Guides: [
+          {
+            type: "doc",
+            label: "Getting Started",
+            id: "docs/api/graphql/getting-started",
+          },
+          {
+            type: "doc",
+            label: "Querying Metadata Entities",
+            id: "docs/api/graphql/querying-entities",
+          },
+        ],
+      },
+    ],
     "Developer Guides": [
       // TODO: the titles of these should not be in question form in the sidebar
       "docs/developers",
@@ -122,12 +188,13 @@ module.exports = {
       "docs/how/delete-metadata",
       "datahub-web-react/src/app/analytics/README",
       "metadata-ingestion/developing",
+      "docker/airflow/local_airflow",
     ],
     Components: [
       "datahub-web-react/README",
       "datahub-frontend/README",
       "datahub-graphql-core/README",
-      "gms/README",
+      "metadata-service/README",
       "datahub-gms-graphql-service/README",
       // "metadata-jobs/README",
       "metadata-jobs/mae-consumer-job/README",
@@ -138,10 +205,11 @@ module.exports = {
       "docs/advanced/aspect-versioning",
       "docs/advanced/es-7-upgrade",
       "docs/advanced/high-cardinality",
-      "docs/how/scsi-onboarding-guide",
       "docs/advanced/no-code-upgrade",
       "docs/how/migrating-graph-service-implementation",
       "docs/advanced/mcp-mcl",
+      "docs/advanced/field-path-spec-v2",
+      "docs/advanced/monitoring",
       // WIP "docs/advanced/backfilling",
       // WIP "docs/advanced/derived-aspects",
       // WIP "docs/advanced/entity-hierarchy",
@@ -170,6 +238,7 @@ module.exports = {
       // - "docker/mysql/README",
       // - "docker/neo4j/README",
       // - "docker/postgres/README",
+      // - "perf-test/README",
     ],
     Community: [
       "docs/slack",
