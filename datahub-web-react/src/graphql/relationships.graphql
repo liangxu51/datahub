@@ -8,6 +8,31 @@ fragment relationshipFields on Entity {
             description
         }
     }
+    ... on DataFlow {
+        orchestrator
+        flowId
+        cluster
+        properties {
+            name
+            description
+            project
+        }
+        ownership {
+            ...ownershipFields
+        }
+        globalTags {
+            ...globalTagsFields
+        }
+        glossaryTerms {
+            ...glossaryTerms
+        }
+        editableProperties {
+            description
+        }
+        domain {
+            ...entityDomain
+        }
+    }
     ... on Dashboard {
         ...dashboardRelationshipsLeaf
         ...dashboardFields
@@ -18,35 +43,37 @@ fragment relationshipFields on Entity {
     ... on Chart {
         tool
         chartId
-        info {
+        properties {
             name
             description
-            inputs {
-                urn
-            }
         }
         editableProperties {
             description
         }
         ownership {
             ...ownershipFields
+        }
+        domain {
+            ...entityDomain
         }
         ...chartRelationshipsLeaf
     }
     ... on Dataset {
         name
-        description
+        properties {
+            description
+        }
         editableProperties {
             description
         }
         platform {
-            name
-            info {
-                logoUrl
-            }
+            ...platformFields
         }
         ownership {
             ...ownershipFields
+        }
+        subTypes {
+            typeNames
         }
         ...datasetRelationshipsLeaf
     }
@@ -57,11 +84,7 @@ fragment relationshipFields on Entity {
         description
         origin
         platform {
-            name
-            info {
-                displayName
-                logoUrl
-            }
+            ...platformFields
         }
         ownership {
             ...ownershipFields
@@ -74,11 +97,7 @@ fragment relationshipFields on Entity {
         description
         origin
         platform {
-            name
-            info {
-                displayName
-                logoUrl
-            }
+            ...platformFields
         }
         ownership {
             ...ownershipFields

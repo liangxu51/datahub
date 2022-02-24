@@ -4,6 +4,7 @@ import { MlModel, EntityType, SearchResult, RelationshipDirection } from '../../
 import { Preview } from './preview/Preview';
 import { MLModelProfile } from './profile/MLModelProfile';
 import { Entity, IconStyleType, PreviewType } from '../Entity';
+import { getDataForEntityType } from '../shared/containers/profile/utils';
 import { getChildrenFromRelationships } from '../../lineage/utils/getChildren';
 
 /**
@@ -75,12 +76,16 @@ export class MLModelEntity implements Entity<MlModel> {
                 outgoingRelationships: entity?.['outgoing'],
                 direction: RelationshipDirection.Outgoing,
             }),
-            icon: entity.platform?.info?.logoUrl || undefined,
+            icon: entity.platform?.properties?.logoUrl || undefined,
             platform: entity.platform?.name,
         };
     };
 
     displayName = (data: MlModel) => {
         return data.name;
+    };
+
+    getGenericEntityProperties = (mlModel: MlModel) => {
+        return getDataForEntityType({ data: mlModel, entityType: this.type, getOverrideProperties: (data) => data });
     };
 }

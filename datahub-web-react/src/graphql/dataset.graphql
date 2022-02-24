@@ -58,6 +58,12 @@ query getDataset($urn: String!) {
         subTypes {
             typeNames
         }
+        domain {
+            ...entityDomain
+        }
+        container {
+            ...entityContainer
+        }
         usageStats(resource: $urn, range: MONTH) {
             buckets {
                 bucket
@@ -104,6 +110,9 @@ query getDataset($urn: String!) {
                 sampleValues
             }
         }
+        operations(limit: 1) {
+            timestampMillis
+        }
         incoming: relationships(
             input: { types: ["DownstreamOf", "Consumes", "Produces"], direction: INCOMING, start: 0, count: 100 }
         ) {
@@ -115,6 +124,15 @@ query getDataset($urn: String!) {
             ...fullRelationshipResults
         }
         ...viewProperties
+        autoRenderAspects: aspects(input: { autoRenderOnly: true }) {
+            aspectName
+            payload
+            renderSpec {
+                displayType
+                displayName
+                key
+            }
+        }
     }
 }
 
